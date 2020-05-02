@@ -3,13 +3,14 @@ const express = require('express')
 const expressGraphQL = require('express-graphql')
 const { buildSchema } = require('graphql')
 
+const { MongoDB } = require('./db')
+const { Event } = require('./models')
+
 const port = process.env.PORT
 
 const app = express()
 
 app.use(express.json())
-
-const events = []
 
 app.use('/graphql', expressGraphQL({
     schema: buildSchema(`
@@ -19,6 +20,8 @@ app.use('/graphql', expressGraphQL({
             description: String!
             price: Float!
             date: String!
+            createdAt: String!
+            updatedAt: String!
         }
 
         input EventInput {
@@ -42,21 +45,31 @@ app.use('/graphql', expressGraphQL({
         }
     `),
     rootValue: {
-        events: () => {
-            return events
+        events: async () => {
+            try {
+                let events = await Event.find()
+                return events
+            } catch (err) {
+                console.log(err)
+                throw err
+            }
         },
 
-        createEvent: args => {
+        createEvent: async args => {
             const { title, description, price, date } = args.eventInput
-            const event = {
-                _id: Math.random().toString(),
-                title,
-                description,
-                price,
-                date: new Date(date).toISOString()
+            try {
+                const event = await Event.create({
+                    title,
+                    description,
+                    price,
+                    date: new Date(date)
+                })
+                console.log(event)
+                return event
+            } catch (err) {
+                console.log(err)
+                throw err
             }
-            events.push(event)
-            return event
         }
     },
     graphiql: process.env.NODE_ENV !== 'production' ? true : false
