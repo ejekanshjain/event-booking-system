@@ -2,9 +2,10 @@ if (process.env.NODE_ENV !== 'production') require('dotenv').config()
 const express = require('express')
 const expressGraphQL = require('express-graphql')
 const { buildSchema } = require('graphql')
+const bcrypt = require('bcryptjs')
 
 const { MongoDB } = require('./db')
-const { Event } = require('./models')
+const { User, Event } = require('./models')
 
 const port = process.env.PORT
 
@@ -14,6 +15,14 @@ app.use(express.json())
 
 app.use('/graphql', expressGraphQL({
     schema: buildSchema(`
+        type User {
+            _id: ID!
+            email: String!
+            password: String
+            createdAt: String!
+            updatedAt: String!
+        }
+
         type Event {
             _id: ID!
             title: String!
@@ -22,6 +31,11 @@ app.use('/graphql', expressGraphQL({
             date: String!
             createdAt: String!
             updatedAt: String!
+        }
+
+        input UserInput {
+            email: String!
+            password: String!
         }
 
         input EventInput {
@@ -36,6 +50,7 @@ app.use('/graphql', expressGraphQL({
         }
 
         type RootMutation {
+            createUser(userInput: UserInput): User
             createEvent(eventInput: EventInput): Event
         }
 
@@ -45,6 +60,24 @@ app.use('/graphql', expressGraphQL({
         }
     `),
     rootValue: {
+        createUser: async args => {
+            const { email, password } = args.userInput
+            try {
+                const hashedPassword = await bcrypt.hash(password, 10)
+                const user = await User.create({
+                    email,
+                    password: hashedPassword
+                })
+                return {
+                    ...user._doc,
+                    password: null
+                }
+            } catch (err) {
+                console.log(err)
+                throw err
+            }
+        },
+
         events: async () => {
             try {
                 let events = await Event.find()
@@ -62,9 +95,16 @@ app.use('/graphql', expressGraphQL({
                     title,
                     description,
                     price,
-                    date: new Date(date)
+                    date: new Date(date),
+                    creator: '5eae1316df974d1e4823ebca'
                 })
-                console.log(event)
+                await User.updateOne({
+                    _id: '5eae1316df974d1e4823ebca'
+                }, {
+                    $push: {
+                        createdEvents: event._id
+                    }
+                })
                 return event
             } catch (err) {
                 console.log(err)
