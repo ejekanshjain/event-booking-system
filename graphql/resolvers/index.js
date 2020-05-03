@@ -1,6 +1,27 @@
 const bcrypt = require('bcryptjs')
 
 const { User, Event, Booking } = require('../../models')
+const { transformDateToString } = require('../../util')
+
+const transformEvent = event => {
+    return {
+        ...event._doc,
+        date: transformDateToString(event.date),
+        createdAt: transformDateToString(event.createdAt),
+        updatedAt: transformDateToString(event.updatedAt),
+        creator: user.bind(this, event.creator)
+    }
+}
+
+const transformBooking = booking => {
+    return {
+        ...booking._doc,
+        createdAt: transformDateToString(booking.createdAt),
+        updatedAt: transformDateToString(booking.updatedAt),
+        event: event.bind(this, booking.event),
+        user: user.bind(this, booking.user)
+    }
+}
 
 const user = async userId => {
     try {
@@ -8,8 +29,8 @@ const user = async userId => {
         return {
             ...user._doc,
             password: null,
-            createdAt: new Date(user.createdAt).toISOString(),
-            updatedAt: new Date(user.updatedAt).toISOString(),
+            createdAt: transformDateToString(user.createdAt),
+            updatedAt: transformDateToString(user.updatedAt),
             createdEvents: events.bind(this, user.createdEvents)
         }
     } catch (err) {
@@ -22,13 +43,7 @@ const events = async eventIds => {
     try {
         const events = await Event.find({ _id: { $in: eventIds } })
         return events.map(event => {
-            return {
-                ...event._doc,
-                date: new Date(event.date).toISOString(),
-                createdAt: new Date(event.createdAt).toISOString(),
-                updatedAt: new Date(event.updatedAt).toISOString(),
-                creator: user.bind(this, event.creator)
-            }
+            return transformEvent(event)
         })
     } catch (err) {
         console.log(err)
@@ -39,12 +54,7 @@ const events = async eventIds => {
 const event = async eventId => {
     try {
         const event = await Event.findOne({ _id: eventId })
-        return {
-            ...event._doc,
-            createdAt: new Date(event.createdAt).toISOString(),
-            updatedAt: new Date(event.updatedAt).toISOString(),
-            creator: user.bind(this, event.creator)
-        }
+        return transformEvent(event)
     } catch (err) {
         console.log(err)
         throw err
@@ -62,9 +72,10 @@ module.exports = {
             })
             return {
                 ...user._doc,
-                createdAt: new Date(user.createdAt).toISOString(),
-                updatedAt: new Date(user.updatedAt).toISOString(),
-                password: null
+                createdAt: transformDateToString(user.createdAt),
+                updatedAt: transformDateToString(user.updatedAt),
+                password: null,
+                createdEvents: null
             }
         } catch (err) {
             console.log(err)
@@ -76,13 +87,7 @@ module.exports = {
         try {
             let events = await Event.find()
             return events.map(event => {
-                return {
-                    ...event._doc,
-                    date: new Date(event.date).toISOString(),
-                    createdAt: new Date(event.createdAt).toISOString(),
-                    updatedAt: new Date(event.updatedAt).toISOString(),
-                    creator: user.bind(this, event.creator)
-                }
+                return transformEvent(event)
             })
         } catch (err) {
             console.log(err)
@@ -97,7 +102,7 @@ module.exports = {
                 title,
                 description,
                 price,
-                date: new Date(date),
+                date: transformDateToString(date),
                 creator: '5eae1316df974d1e4823ebca'
             })
             await User.updateOne({
@@ -107,13 +112,7 @@ module.exports = {
                     createdEvents: event._id
                 }
             })
-            return {
-                ...event._doc,
-                date: new Date(event.date).toISOString(),
-                createdAt: new Date(event.createdAt).toISOString(),
-                updatedAt: new Date(event.updatedAt).toISOString(),
-                creator: user.bind(this, event.creator)
-            }
+            return transformEvent(event)
         } catch (err) {
             console.log(err)
             throw err
@@ -124,13 +123,7 @@ module.exports = {
         try {
             const bookings = await Booking.find()
             return bookings.map(booking => {
-                return {
-                    ...booking._doc,
-                    createdAt: new Date(booking.createdAt).toISOString(),
-                    updatedAt: new Date(booking.updatedAt).toISOString(),
-                    event: event.bind(this, booking.event),
-                    user: user.bind(this, booking.user)
-                }
+                return transformBooking(booking)
             })
         } catch (err) {
             console.log(err)
@@ -147,13 +140,7 @@ module.exports = {
                 event: args.eventId,
                 user: '5eae1316df974d1e4823ebca'
             })
-            return {
-                ...booking._doc,
-                createdAt: new Date(booking.createdAt).toISOString(),
-                updatedAt: new Date(booking.updatedAt).toISOString(),
-                event: event.bind(this, booking.event),
-                user: user.bind(this, booking.user)
-            }
+            return transformBooking(booking)
         } catch (err) {
             console.log(err)
             throw err
@@ -163,12 +150,7 @@ module.exports = {
     cancelBooking: async args => {
         try {
             const booking = await Booking.findOne({ _id: args.bookingId }).populate('event')
-            const event = {
-                ...booking.event._doc,
-                createdAt: new Date(booking.event.createdAt).toISOString(),
-                updatedAt: new Date(booking.event.updatedAt).toISOString(),
-                creator: user.bind(this, booking.event.creator)
-            }
+            const event = transformEvent(booking.event)
             await Booking.deleteOne({ _id: args.bookingId })
             return event
         } catch (err) {
