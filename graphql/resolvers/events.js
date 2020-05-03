@@ -14,18 +14,20 @@ const events = async () => {
     }
 }
 
-const createEvent = async args => {
+const createEvent = async (args, req) => {
     try {
+        if (!req.isAuthenticated())
+            throw new Error('Unauthorized')
         const { title, description, price, date } = args.eventInput
         const event = await Event.create({
             title,
             description,
             price,
             date: transformDateToString(date),
-            creator: '5eae1316df974d1e4823ebca'
+            creator: req.user._id
         })
         await User.updateOne({
-            _id: '5eae1316df974d1e4823ebca'
+            _id: req.user._id
         }, {
             $push: {
                 createdEvents: event._id

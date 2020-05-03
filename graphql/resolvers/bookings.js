@@ -13,14 +13,16 @@ const bookings = async () => {
     }
 }
 
-const bookEvent = async args => {
+const bookEvent = async (args, req) => {
     try {
+        if (!req.isAuthenticated())
+            throw new Error('Unauthorized')
         const foundEvent = await Event.findOne({ _id: args.eventId })
         if (!foundEvent)
             throw new Error('Booking Not Found')
         const booking = await Booking.create({
             event: args.eventId,
-            user: '5eae1316df974d1e4823ebca'
+            user: req.user._id
         })
         return transformBooking(booking)
     } catch (err) {
@@ -29,9 +31,11 @@ const bookEvent = async args => {
     }
 }
 
-const cancelBooking = async args => {
+const cancelBooking = async (args, req) => {
     try {
-        const booking = await Booking.findOne({ _id: args.bookingId }).populate('event')
+        if (!req.isAuthenticated())
+            throw new Error('Unauthorized')
+        const booking = await Booking.findOne({ _id: args.bookingId, user: req.user._id }).populate('event')
         const event = transformEvent(booking.event)
         await Booking.deleteOne({ _id: args.bookingId })
         return event
