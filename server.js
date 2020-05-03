@@ -3,6 +3,7 @@ const express = require('express')
 const expressGraphQL = require('express-graphql')
 
 const { MongoDB } = require('./db')
+const { authToken } = require('./middlewares')
 const graphQLSchema = require('./graphql/schema')
 const graphQLResolers = require('./graphql/resolvers')
 
@@ -11,6 +12,7 @@ const port = process.env.PORT
 const app = express()
 
 app.use(express.json())
+app.use(authToken)
 
 app.use('/graphql', expressGraphQL({
     schema: graphQLSchema,
