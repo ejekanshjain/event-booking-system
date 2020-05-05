@@ -1,8 +1,10 @@
-import React, { useRef, useState } from 'react'
+import React, { useRef, useState, useContext } from 'react'
 
 import './Auth.css'
+import UserContext from '../context/UserContext'
 
 const Auth = () => {
+    const user = useContext(UserContext)
     const [isLogin, setIsLogin] = useState(true)
     const emailRef = useRef()
     const passwordRef = useRef()
@@ -47,11 +49,17 @@ const Auth = () => {
             body: JSON.stringify(data)
         })
         const json = await result.json()
-        console.log(result.status)
-        if (result.status === 200 || result.status === 201)
-            console.log(json)
-        else
-            console.log({ message: 'Something went wrong', error: json })
+        if (result.status === 200 || result.status === 201) {
+            // console.log(json)
+            if (json.data.login) {
+                user.login(json.data.login.userId, json.data.login.token, json.data.login.expiration)
+            } else {
+                alert(json.errors[0].message)
+            }
+        }
+        else {
+            // console.log({ message: 'Something went wrong', error: json })
+        }
     }
     return (
         <div>
