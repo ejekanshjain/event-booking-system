@@ -1,0 +1,31 @@
+.output-type-control {
+    padding: 0.5rem;
+    text-align: center;
+}
+
+.output-type-control button {
+    font: inherit;
+    border: none;
+    background: transparent;
+    color: black;
+    padding: 0.25rem 1rem;
+    border-bottom: 2px solid transparent;
+    transition: all 300ms ease;
+    cursor: pointer;
+}
+
+.output-type-control button.active {
+    border-bottom-color: #8c7ae6;
+}
+
+.output-type-control button:hover {
+    border-bottom-color: #4f4196;
+}
+
+.output-type-control button:focus {
+    outline: none;
+}
+
+.chart {
+    text-align: center;
+}
