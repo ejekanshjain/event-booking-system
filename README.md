@@ -19,6 +19,6 @@
 ### npm run build
 
 #### also create a .env file or set these environment variables
-PORT=
-MONGODB_URL==
-JWT_SECRET==
+##### PORT=
+##### MONGODB_URL=
+##### JWT_SECRET=
