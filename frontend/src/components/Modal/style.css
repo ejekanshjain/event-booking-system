@@ -1,0 +1,28 @@
+.modal {
+    position: absolute;
+    width: 40rem;
+    max-width: 80%;
+    background: #fefefe;
+    box-shadow: 0 2px 8px #00000033;
+    top: 20vh;
+    left: 33%;
+    z-index: 100;
+}
+
+.modal-header {
+    padding: 1rem;
+    background: #8c7ae6;
+    margin: 0;
+    font-size: 1.5rem;
+    color: #fff;
+}
+
+.modal-content {
+    padding: 1rem;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding: 1rem;
+}

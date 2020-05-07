@@ -44,8 +44,7 @@
     border: none;
     background: transparent;
     cursor: pointer;
-    vertical-align: middle;
-    margin: 0;
+    font: inherit;
     transition: all 300ms ease;
 }
 

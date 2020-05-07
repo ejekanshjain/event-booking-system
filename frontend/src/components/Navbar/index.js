@@ -6,10 +6,6 @@ import UserContext from '../../context/UserContext'
 
 const Navbar = () => {
     const user = useContext(UserContext)
-    const logoutHandler = e => {
-        e.preventDefault()
-        user.logout()
-    }
     return (
         <header className="navbar" >
             <div className="navbar-logo">
@@ -27,7 +23,7 @@ const Navbar = () => {
                         <NavLink to="/bookings">Bookings</NavLink>
                     </li>}
                     {user.token && <li>
-                        <a href="/" type="button" onClick={logoutHandler}>Logout</a>
+                        <button type="button" onClick={user.logout}>Logout</button>
                     </li>}
                 </ul>
             </nav>

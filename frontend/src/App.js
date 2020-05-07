@@ -40,6 +40,7 @@ const App = () => {
                         <Route path="/auth" component={Auth} exact />
                         <Route path="/events" component={Events} exact />
                         <Route path="/bookings" component={Bookings} exact />
+                        <Redirect from="*" to="/" />
                     </Switch>
                 </main>
             </UserContext.Provider>

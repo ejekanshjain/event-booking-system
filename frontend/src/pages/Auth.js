@@ -50,15 +50,18 @@ const Auth = () => {
         })
         const json = await result.json()
         if (result.status === 200 || result.status === 201) {
-            // console.log(json)
+            console.log(json)
             if (json.data.login) {
                 user.login(json.data.login.userId, json.data.login.token, json.data.login.expiration)
+            } else if (json.data.createUser) {
+                alert('Registered Successfully')
+                setIsLogin(true)
             } else {
                 alert(json.errors[0].message)
             }
         }
         else {
-            // console.log({ message: 'Something went wrong', error: json })
+            console.log({ message: 'Something went wrong', error: json })
         }
     }
     return (
