@@ -1,15 +1,25 @@
+const dataloader = require('dataloader')
+
 const { User, Event } = require('../../models')
 const { transformDateToString } = require('../../util')
 
+const eventLoader = new dataloader(eventIds => {
+    return events(eventIds)
+})
+
+const userLoader = new dataloader(async userIds => {
+    return await User.find({ _id: { $in: userIds } })
+})
+
 const user = async userId => {
     try {
-        const user = await User.findOne({ _id: userId })
+        const user = await userLoader.load(userId.toString())
         return {
             ...user._doc,
             password: null,
             createdAt: transformDateToString(user.createdAt),
             updatedAt: transformDateToString(user.updatedAt),
-            createdEvents: events.bind(this, user.createdEvents)
+            createdEvents: () => eventLoader.loadMany(user.createdEvents)
         }
     } catch (err) {
         console.log(err)
@@ -31,8 +41,8 @@ const events = async eventIds => {
 
 const event = async eventId => {
     try {
-        const event = await Event.findOne({ _id: eventId })
-        return transformEvent(event)
+        const event = await eventLoader.load(eventId.toString())
+        return event
     } catch (err) {
         console.log(err)
         throw err
