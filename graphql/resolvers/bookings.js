@@ -1,9 +1,11 @@
 const { Event, Booking } = require('../../models')
 const { transformEvent, transformBooking } = require('./transformations')
 
-const bookings = async () => {
+const bookings = async (args, req) => {
     try {
-        const bookings = await Booking.find()
+        if (!req.isAuthenticated())
+            throw new Error('Unauthorized')
+        const bookings = await Booking.find({ user: req.user._id })
         return bookings.map(booking => {
             return transformBooking(booking)
         })
