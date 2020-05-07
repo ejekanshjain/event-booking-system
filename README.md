@@ -12,6 +12,7 @@
 ### npm run dev
 
 ### Start React application in development
+### cd frontend
 ### npm start
 
 ### build react application
